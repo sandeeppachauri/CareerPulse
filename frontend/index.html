@@ -1,0 +1,776 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>CareerPulse ⚡ — Career Intelligence Hub</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;500;600;700;800&family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;1,9..40,300&display=swap" rel="stylesheet">
+
+<!-- API URL Configuration - change this to your Railway backend URL before deploying -->
+<script>window.CAREERPULSE_API_URL = 'http://localhost:3001/api';</script>
+
+<style>
+:root {
+  --bg:#0a0a0f; --bg2:#12121a; --bg3:#1a1a26; --surface:#1e1e2e; --surface2:#252538;
+  --border:rgba(255,255,255,0.08); --border2:rgba(255,255,255,0.14);
+  --text:#f0f0f8; --muted:#8888aa; --muted2:#5a5a7a;
+  --accent:#6c63ff; --accent2:#a78bfa; --teal:#2dd4bf; --teal2:#99f6e4;
+  --amber:#fbbf24; --rose:#fb7185; --green:#4ade80;
+  --radius:16px; --radius-sm:10px; --radius-xs:7px;
+}
+*{margin:0;padding:0;box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text);min-height:100vh;overflow-x:hidden}
+
+/* Ambient orbs */
+.orb{position:fixed;border-radius:50%;filter:blur(90px);opacity:.10;pointer-events:none;z-index:0}
+.orb1{width:600px;height:600px;background:var(--accent);top:-150px;left:-100px}
+.orb2{width:400px;height:400px;background:var(--teal);bottom:10%;right:-80px}
+.orb3{width:300px;height:300px;background:var(--amber);top:45%;left:35%;opacity:.06}
+
+/* App layout */
+.app{display:flex;min-height:100vh;position:relative;z-index:1}
+
+/* Sidebar */
+.sidebar{
+  width:256px;background:rgba(14,14,22,0.92);border-right:1px solid var(--border);
+  display:flex;flex-direction:column;padding:20px 14px;
+  position:fixed;height:100vh;top:0;left:0;
+  backdrop-filter:blur(24px);z-index:100;transition:transform .3s ease;
+}
+.logo{font-family:'Syne',sans-serif;font-weight:800;font-size:21px;padding:8px 12px 22px;letter-spacing:-.5px;background:linear-gradient(135deg,var(--accent2),var(--teal));-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text}
+.logo span{font-weight:400;font-size:10px;display:block;-webkit-text-fill-color:var(--muted);margin-top:-4px;letter-spacing:1.5px;text-transform:uppercase}
+.nav-label{font-size:10px;letter-spacing:1.5px;text-transform:uppercase;color:var(--muted2);padding:0 12px;margin:14px 0 5px}
+.nav-item{display:flex;align-items:center;gap:11px;padding:9px 12px;border-radius:var(--radius-sm);cursor:pointer;color:var(--muted);font-size:13.5px;font-weight:400;transition:all .2s;border:1px solid transparent;text-decoration:none;user-select:none}
+.nav-item:hover{background:var(--surface);color:var(--text);border-color:var(--border)}
+.nav-item.active{background:rgba(108,99,255,0.15);color:var(--accent2);border-color:rgba(108,99,255,0.3);font-weight:500}
+.nav-item .icon{width:17px;text-align:center;font-size:15px;flex-shrink:0}
+.nav-badge{margin-left:auto;background:var(--rose);color:#fff;font-size:10px;font-weight:600;padding:2px 7px;border-radius:20px;animation:pulse 2s infinite}
+.sidebar-footer{margin-top:auto;padding-top:14px;border-top:1px solid var(--border)}
+.user-chip{display:flex;align-items:center;gap:10px;padding:10px 12px;border-radius:var(--radius-sm);background:var(--surface);cursor:pointer;transition:background .2s}
+.user-chip:hover{background:var(--surface2)}
+.avatar{width:34px;height:34px;border-radius:50%;background:linear-gradient(135deg,var(--accent),var(--teal));display:flex;align-items:center;justify-content:center;font-family:'Syne',sans-serif;font-weight:700;font-size:13px;color:#fff;flex-shrink:0}
+.user-info p{font-size:13px;font-weight:500;line-height:1.3}
+.user-info small{font-size:11px;color:var(--muted)}
+
+/* Main content */
+.main{margin-left:256px;flex:1;padding:28px 32px;min-height:100vh}
+
+/* Pages */
+.page{display:none}
+.page.active{display:block;animation:fadeIn .3s ease}
+@keyframes fadeIn{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}
+@keyframes slideUp{from{opacity:0;transform:translateY(20px)}to{opacity:1;transform:translateY(0)}}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:.5}}
+@keyframes spin{to{transform:rotate(360deg)}}
+
+/* Top bar */
+.topbar{display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:28px;gap:16px;flex-wrap:wrap}
+.page-title{font-family:'Syne',sans-serif;font-weight:700;font-size:26px;line-height:1.2}
+.page-sub{color:var(--muted);font-size:13.5px;margin-top:3px}
+.topbar-right{display:flex;gap:10px;align-items:center;flex-shrink:0}
+
+/* Buttons */
+.btn{padding:9px 18px;border-radius:var(--radius-sm);font-family:'DM Sans',sans-serif;font-size:13.5px;font-weight:500;cursor:pointer;border:none;transition:all .2s;display:inline-flex;align-items:center;gap:7px;white-space:nowrap}
+.btn:disabled{opacity:.5;cursor:not-allowed}
+.btn-primary{background:var(--accent);color:#fff}
+.btn-primary:hover:not(:disabled){background:#7c73ff;transform:translateY(-1px)}
+.btn-ghost{background:transparent;color:var(--muted);border:1px solid var(--border2)}
+.btn-ghost:hover:not(:disabled){border-color:var(--accent2);color:var(--accent2);background:rgba(108,99,255,0.08)}
+.btn-teal{background:var(--teal);color:#0a0a0f;font-weight:600}
+.btn-teal:hover:not(:disabled){background:var(--teal2);transform:translateY(-1px)}
+.btn-danger{background:rgba(251,113,133,0.15);color:var(--rose);border:1px solid rgba(251,113,133,0.3)}
+.btn-danger:hover:not(:disabled){background:rgba(251,113,133,0.25)}
+.btn-sm{padding:6px 13px;font-size:12.5px}
+.btn-xs{padding:4px 10px;font-size:11.5px}
+
+/* Cards */
+.card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:22px;transition:border-color .2s}
+.card:hover{border-color:var(--border2)}
+
+/* Grid layouts */
+.grid-2{display:grid;grid-template-columns:1fr 1fr;gap:20px}
+.grid-3{display:grid;grid-template-columns:repeat(3,1fr);gap:18px}
+.grid-4{display:grid;grid-template-columns:repeat(4,1fr);gap:16px}
+.grid-auto{display:grid;grid-template-columns:repeat(auto-fill,minmax(320px,1fr));gap:16px}
+
+/* Stat cards */
+.stat-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:18px}
+.stat-label{font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:.8px;margin-bottom:6px}
+.stat-value{font-family:'Syne',sans-serif;font-size:30px;font-weight:700;margin-bottom:3px}
+.stat-delta{font-size:12px}
+.delta-up{color:var(--green)}
+.delta-down{color:var(--rose)}
+
+/* Badges */
+.badge{display:inline-flex;align-items:center;padding:3px 9px;border-radius:20px;font-size:11.5px;font-weight:500;white-space:nowrap}
+.badge-purple{background:rgba(108,99,255,.2);color:var(--accent2)}
+.badge-teal{background:rgba(45,212,191,.15);color:var(--teal)}
+.badge-amber{background:rgba(251,191,36,.15);color:var(--amber)}
+.badge-green{background:rgba(74,222,128,.15);color:var(--green)}
+.badge-rose{background:rgba(251,113,133,.15);color:var(--rose)}
+.badge-gray{background:var(--surface2);color:var(--muted)}
+
+/* Section header */
+.section-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:18px}
+.section-title{font-family:'Syne',sans-serif;font-weight:600;font-size:17px}
+.divider{height:1px;background:var(--border);margin:20px 0}
+
+/* Score ring */
+.score-ring-wrap{position:relative;width:110px;height:110px;flex-shrink:0}
+.score-ring-wrap svg{transform:rotate(-90deg)}
+.score-center{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);text-align:center}
+.score-center .num{font-family:'Syne',sans-serif;font-size:26px;font-weight:800}
+.score-center .lbl{font-size:10px;color:var(--muted)}
+
+/* Progress bars */
+.strength-bar{margin-bottom:12px}
+.strength-bar .sb-head{display:flex;justify-content:space-between;font-size:12.5px;margin-bottom:5px}
+.strength-bar .sb-track{height:5px;background:var(--bg3);border-radius:10px;overflow:hidden}
+.strength-bar .sb-fill{height:100%;border-radius:10px;transition:width 1.2s ease}
+
+/* Job cards */
+.job-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:18px;display:flex;flex-direction:column;gap:11px;transition:all .2s;cursor:pointer}
+.job-card:hover{border-color:rgba(108,99,255,.4);transform:translateY(-2px);background:var(--surface2)}
+.job-card.is-saved{border-color:rgba(45,212,191,.25)}
+.company-logo{width:42px;height:42px;border-radius:9px;background:var(--bg3);display:flex;align-items:center;justify-content:center;font-size:20px;flex-shrink:0;border:1px solid var(--border)}
+.job-title{font-weight:600;font-size:14.5px;margin-bottom:2px;line-height:1.3}
+.job-company{font-size:12.5px;color:var(--muted)}
+.job-meta{display:flex;gap:6px;flex-wrap:wrap}
+.job-actions{display:flex;gap:7px;margin-top:2px}
+.match-pill{margin-left:auto;flex-shrink:0;background:rgba(108,99,255,.15);border-radius:8px;padding:5px 10px;text-align:center}
+.match-pill .mp-num{font-family:'Syne',sans-serif;font-weight:700;font-size:17px;color:var(--accent2)}
+.match-pill .mp-lbl{font-size:9.5px;color:var(--muted)}
+
+/* Filter bar */
+.filter-bar{display:flex;gap:8px;margin-bottom:20px;flex-wrap:wrap;align-items:center}
+.filter-pill{padding:7px 15px;border-radius:20px;font-size:12.5px;font-weight:500;cursor:pointer;border:1px solid var(--border2);background:transparent;color:var(--muted);font-family:'DM Sans',sans-serif;transition:all .2s}
+.filter-pill:hover{border-color:var(--accent2);color:var(--accent2)}
+.filter-pill.active{background:rgba(108,99,255,.2);border-color:var(--accent);color:var(--accent2)}
+
+/* Search box */
+.search-box{display:flex;align-items:center;background:var(--surface);border:1px solid var(--border2);border-radius:var(--radius-sm);padding:10px 15px;gap:10px;margin-bottom:20px;transition:border-color .2s}
+.search-box:focus-within{border-color:var(--accent)}
+.search-box input{background:transparent;border:none;outline:none;color:var(--text);font-family:'DM Sans',sans-serif;font-size:14px;flex:1}
+.search-box input::placeholder{color:var(--muted)}
+
+/* Toggle group */
+.toggle-group{display:flex;background:var(--bg3);border-radius:var(--radius-sm);padding:3px;gap:3px}
+.toggle-opt{padding:7px 14px;border-radius:8px;font-size:12.5px;cursor:pointer;color:var(--muted);transition:all .2s;font-family:'DM Sans',sans-serif;background:none;border:none}
+.toggle-opt.active{background:var(--surface);color:var(--text);font-weight:500}
+
+/* Suggestion item */
+.suggestion-item{display:flex;align-items:flex-start;gap:14px;background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:16px;margin-bottom:10px;transition:border-color .2s}
+.suggestion-item:hover{border-color:var(--border2)}
+.sug-icon{width:40px;height:40px;border-radius:9px;display:flex;align-items:center;justify-content:center;font-size:19px;flex-shrink:0}
+.sug-body h4{font-size:13.5px;font-weight:600;margin-bottom:3px}
+.sug-body p{font-size:12.5px;color:var(--muted);line-height:1.65}
+
+/* Alert items */
+.alert-row{display:flex;align-items:center;gap:12px;background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:14px;margin-bottom:8px;transition:border-color .2s}
+.alert-row:hover{border-color:var(--border2)}
+.alert-icon-wrap{font-size:20px;flex-shrink:0;width:36px;text-align:center}
+.alert-content h4{font-size:13.5px;font-weight:500;margin-bottom:2px}
+.alert-content p{font-size:12px;color:var(--muted)}
+.alert-time{margin-left:auto;font-size:11px;color:var(--muted);white-space:nowrap;flex-shrink:0}
+
+/* Activity dot */
+.activity-dot{width:8px;height:8px;border-radius:50%;flex-shrink:0;margin-top:5px}
+
+/* Form elements */
+.form-group{margin-bottom:16px}
+.form-label{font-size:11.5px;font-weight:500;color:var(--muted);display:block;margin-bottom:7px;text-transform:uppercase;letter-spacing:.8px}
+.form-input,.form-select,.form-textarea{width:100%;background:var(--surface);border:1px solid var(--border2);border-radius:var(--radius-sm);padding:11px 14px;color:var(--text);font-family:'DM Sans',sans-serif;font-size:13.5px;outline:none;transition:border-color .2s;appearance:none}
+.form-input:focus,.form-select:focus,.form-textarea:focus{border-color:var(--accent)}
+.form-input::placeholder,.form-textarea::placeholder{color:var(--muted)}
+.form-select option{background:var(--surface);color:var(--text)}
+.form-textarea{resize:vertical;min-height:80px}
+.form-row{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+.form-tags{display:flex;flex-wrap:wrap;gap:6px;margin-top:8px}
+.form-tag{padding:4px 10px;background:rgba(108,99,255,.2);border:1px solid rgba(108,99,255,.3);border-radius:20px;font-size:12px;color:var(--accent2);cursor:pointer;display:flex;align-items:center;gap:5px}
+.form-tag .rm{opacity:.6;font-size:14px}
+.form-tag .rm:hover{opacity:1}
+
+/* Modal */
+.modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,.82);backdrop-filter:blur(12px);z-index:200;display:flex;align-items:center;justify-content:center;padding:20px;animation:fadeIn .2s ease}
+.modal{background:var(--bg2);border:1px solid var(--border2);border-radius:22px;padding:36px;width:100%;max-width:500px;max-height:90vh;overflow-y:auto}
+.modal h2{font-family:'Syne',sans-serif;font-weight:700;font-size:22px;margin-bottom:6px}
+.modal-sub{color:var(--muted);font-size:13.5px;margin-bottom:24px;line-height:1.65}
+.modal-footer{display:flex;gap:10px;margin-top:20px}
+.modal-close{position:absolute;top:16px;right:16px;background:none;border:none;color:var(--muted);font-size:20px;cursor:pointer;padding:4px;line-height:1}
+.modal-close:hover{color:var(--text)}
+
+/* Step dots */
+.steps{display:flex;gap:7px;margin-bottom:28px}
+.step-dot{width:7px;height:7px;border-radius:50%;background:var(--border2);transition:all .3s}
+.step-dot.active{background:var(--accent);width:22px;border-radius:4px}
+.step-dot.done{background:var(--teal)}
+
+/* Portal items */
+.portal-item{border:1px solid var(--border);border-radius:var(--radius-sm);padding:14px;text-align:center;cursor:pointer;transition:all .2s;background:var(--surface)}
+.portal-item:hover{border-color:var(--accent2)}
+.portal-item.connected{border-color:var(--teal);background:rgba(45,212,191,.05)}
+.portal-grid-3{display:grid;grid-template-columns:repeat(3,1fr);gap:9px;margin-bottom:18px}
+
+/* LinkedIn preview */
+.lp-banner{height:72px;background:linear-gradient(135deg,#0077b5,#004471);border-radius:var(--radius) var(--radius) 0 0;margin:-22px -22px 0}
+.lp-avatar-wrap{margin:-32px 0 10px 16px;position:relative}
+.lp-avatar{width:68px;height:68px;border-radius:50%;background:linear-gradient(135deg,var(--accent),var(--teal));border:3px solid var(--bg2);display:flex;align-items:center;justify-content:center;font-family:'Syne',sans-serif;font-weight:800;font-size:24px;color:#fff}
+
+/* Scrollbar */
+::-webkit-scrollbar{width:5px}
+::-webkit-scrollbar-track{background:transparent}
+::-webkit-scrollbar-thumb{background:var(--surface2);border-radius:10px}
+
+/* Spinner */
+.spinner{width:18px;height:18px;border:2px solid rgba(255,255,255,.2);border-top-color:#fff;border-radius:50%;animation:spin .7s linear infinite;display:inline-block}
+
+/* Empty state */
+.empty-state{text-align:center;padding:60px 20px;color:var(--muted)}
+.empty-state .ei{font-size:48px;margin-bottom:12px;opacity:.6}
+.empty-state h3{font-size:16px;font-weight:500;margin-bottom:6px;color:var(--text)}
+.empty-state p{font-size:13px}
+
+/* App loading */
+#appLoading{position:fixed;inset:0;background:var(--bg);display:flex;align-items:center;justify-content:center;z-index:999;flex-direction:column;gap:16px}
+#appLoading .logo-big{font-family:'Syne',sans-serif;font-weight:800;font-size:32px;background:linear-gradient(135deg,var(--accent2),var(--teal));-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text}
+
+/* Info banner */
+.info-banner{background:rgba(45,212,191,.06);border:1px solid rgba(45,212,191,.2);border-radius:var(--radius);padding:14px 18px;display:flex;align-items:center;gap:12px;margin-bottom:20px;font-size:13px;color:var(--teal)}
+
+/* Responsive */
+@media(max-width:960px){.grid-4{grid-template-columns:repeat(2,1fr)}.grid-3{grid-template-columns:1fr 1fr}.main{padding:20px}}
+@media(max-width:700px){
+  .sidebar{transform:translateX(-100%)}.sidebar.open{transform:translateX(0)}
+  .main{margin-left:0;padding:16px}.grid-2,.grid-3,.grid-4{grid-template-columns:1fr}
+  .burger{display:flex!important}.topbar{flex-wrap:wrap;gap:10px}.page-title{font-size:20px}
+  .modal{padding:24px}
+}
+.burger{display:none;background:none;border:none;cursor:pointer;padding:8px;color:var(--text);font-size:22px}
+
+/* Sidebar overlay on mobile */
+.sidebar-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.6);z-index:99}
+.sidebar-overlay.active{display:block}
+
+/* Table */
+.data-table{width:100%;border-collapse:collapse;font-size:13px}
+.data-table th{text-align:left;padding:10px 8px;color:var(--muted);font-weight:500;border-bottom:1px solid var(--border)}
+.data-table td{padding:12px 8px;border-bottom:1px solid var(--border)}
+.data-table tr:last-child td{border-bottom:none}
+.data-table tr:hover td{background:rgba(255,255,255,.02)}
+</style>
+</head>
+<body>
+
+<!-- App Loading Screen -->
+<div id="appLoading">
+  <div class="logo-big">CareerPulse ⚡</div>
+  <div class="spinner"></div>
+</div>
+
+<!-- Ambient Orbs -->
+<div class="orb orb1"></div><div class="orb orb2"></div><div class="orb orb3"></div>
+
+<!-- Sidebar Overlay (mobile) -->
+<div class="sidebar-overlay" id="sidebarOverlay" onclick="closeSidebar()"></div>
+
+<!-- ════════════════════════════ ONBOARDING MODAL ════════════════════════════ -->
+<div class="modal-overlay" id="onboardingModal" style="display:none">
+  <div class="modal">
+    <div class="steps" id="onboardSteps">
+      <div class="step-dot active"></div>
+      <div class="step-dot"></div>
+      <div class="step-dot"></div>
+    </div>
+
+    <!-- Step 0: Account -->
+    <div id="ob-step-0">
+      <h2>Welcome to CareerPulse ⚡</h2>
+      <p class="modal-sub">Your unified career hub — AI profile analysis, jobs from every portal, smart alerts. Set up takes 2 minutes.</p>
+      <div class="form-group">
+        <label class="form-label">Full Name</label>
+        <input class="form-input" id="ob-name" placeholder="Sandeep Kumar">
+      </div>
+      <div class="form-group">
+        <label class="form-label">Email Address</label>
+        <input class="form-input" id="ob-email" type="email" placeholder="you@example.com">
+      </div>
+      <div class="form-group">
+        <label class="form-label">Mobile Number</label>
+        <input class="form-input" id="ob-mobile" type="tel" placeholder="+91 9999 999 999">
+      </div>
+      <div class="form-group">
+        <label class="form-label">Password</label>
+        <input class="form-input" id="ob-password" type="password" placeholder="Min 6 characters">
+      </div>
+      <button class="btn btn-primary" id="btn-ob-register" style="width:100%;justify-content:center;padding:13px" onclick="obRegister()">Create Account →</button>
+      <p style="text-align:center;margin-top:14px;font-size:13px;color:var(--muted)">Already have an account? <a href="#" onclick="showLogin()" style="color:var(--accent2);text-decoration:none">Sign in</a></p>
+    </div>
+
+    <!-- Step 1: Profile -->
+    <div id="ob-step-1" style="display:none">
+      <h2>Your Professional Profile 🧠</h2>
+      <p class="modal-sub">Help us find the best jobs and analyze your LinkedIn profile accurately.</p>
+      <div class="form-group">
+        <label class="form-label">LinkedIn Profile URL</label>
+        <input class="form-input" id="ob-linkedin" placeholder="https://linkedin.com/in/your-profile">
+      </div>
+      <div class="form-row">
+        <div class="form-group" style="margin-bottom:0">
+          <label class="form-label">Current Role / Title</label>
+          <input class="form-input" id="ob-role" placeholder="Sr. Integration Engineer">
+        </div>
+        <div class="form-group" style="margin-bottom:0">
+          <label class="form-label">Years of Experience</label>
+          <input class="form-input" id="ob-exp" type="number" placeholder="8" min="0" max="50">
+        </div>
+      </div>
+      <div class="form-group" style="margin-top:16px">
+        <label class="form-label">Location</label>
+        <input class="form-input" id="ob-location" placeholder="Noida, UP">
+      </div>
+      <div class="form-group">
+        <label class="form-label">Key Skills (press Enter to add)</label>
+        <input class="form-input" id="ob-skill-input" placeholder="e.g. Apache Kafka" onkeydown="addSkillTag(event)">
+        <div class="form-tags" id="ob-skills-tags"></div>
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-ghost" style="flex:1;justify-content:center" onclick="obStep(0)">← Back</button>
+        <button class="btn btn-primary" id="btn-ob-profile" style="flex:2;justify-content:center" onclick="obSaveProfile()">Continue →</button>
+      </div>
+    </div>
+
+    <!-- Step 2: Portals -->
+    <div id="ob-step-2" style="display:none">
+      <h2>Connect Job Portals 🌐</h2>
+      <p class="modal-sub">Your email & mobile are your identity key — jobs from all portals flow into one unified feed.</p>
+      <div class="portal-grid-3" id="ob-portals-grid"></div>
+      <div class="modal-footer">
+        <button class="btn btn-ghost" style="flex:1;justify-content:center" onclick="obStep(1)">← Back</button>
+        <button class="btn btn-teal" id="btn-ob-portals" style="flex:2;justify-content:center" onclick="obFinish()">Launch Dashboard 🚀</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ════════════════════════════ LOGIN MODAL ════════════════════════════ -->
+<div class="modal-overlay" id="loginModal" style="display:none">
+  <div class="modal" style="max-width:420px">
+    <h2>Sign In ⚡</h2>
+    <p class="modal-sub">Use your email or mobile number to sign in.</p>
+    <div class="form-group">
+      <label class="form-label">Email or Mobile</label>
+      <input class="form-input" id="li-identifier" placeholder="you@example.com or +91 9999999999">
+    </div>
+    <div class="form-group">
+      <label class="form-label">Password</label>
+      <input class="form-input" id="li-password" type="password" placeholder="Your password" onkeydown="if(event.key==='Enter')doLogin()">
+    </div>
+    <button class="btn btn-primary" id="btn-login" style="width:100%;justify-content:center;padding:13px" onclick="doLogin()">Sign In →</button>
+    <p style="text-align:center;margin-top:14px;font-size:13px;color:var(--muted)">No account? <a href="#" onclick="showOnboarding()" style="color:var(--accent2);text-decoration:none">Create one free</a></p>
+  </div>
+</div>
+
+<!-- ════════════════════════════ OTP MODAL ════════════════════════════ -->
+<div class="modal-overlay" id="otpModal" style="display:none">
+  <div class="modal" style="max-width:400px;text-align:center">
+    <div style="font-size:48px;margin-bottom:12px">🔐</div>
+    <h2>Verify Your Email</h2>
+    <p class="modal-sub">We sent a 6-digit code to <strong id="otp-email-display" style="color:var(--text)"></strong></p>
+    <input class="form-input" id="otp-input" maxlength="6" placeholder="000000" style="text-align:center;font-size:28px;font-family:'Syne',sans-serif;letter-spacing:8px;padding:16px">
+    <button class="btn btn-primary" id="btn-verify-otp" style="width:100%;justify-content:center;padding:13px;margin-top:14px" onclick="doVerifyOtp()">Verify →</button>
+    <button class="btn btn-ghost btn-sm" style="margin-top:10px;width:100%;justify-content:center" onclick="doResendOtp()">Resend Code</button>
+  </div>
+</div>
+
+<!-- ════════════════════════════ ADD APPLICATION MODAL ════════════════════════════ -->
+<div class="modal-overlay" id="appModal" style="display:none">
+  <div class="modal">
+    <h2>Track Application 📋</h2>
+    <p class="modal-sub">Log a job application to track your progress.</p>
+    <div class="form-row">
+      <div class="form-group">
+        <label class="form-label">Company</label>
+        <input class="form-input" id="app-company" placeholder="Company name">
+      </div>
+      <div class="form-group">
+        <label class="form-label">Role</label>
+        <input class="form-input" id="app-role" placeholder="Job title">
+      </div>
+    </div>
+    <div class="form-row">
+      <div class="form-group" style="margin-bottom:0">
+        <label class="form-label">Portal</label>
+        <select class="form-select" id="app-portal">
+          <option value="">Select portal</option>
+          <option>LinkedIn</option><option>Naukri</option><option>Indeed</option>
+          <option>Glassdoor</option><option>Company Website</option><option>Referral</option>
+        </select>
+      </div>
+      <div class="form-group" style="margin-bottom:0">
+        <label class="form-label">Status</label>
+        <select class="form-select" id="app-status">
+          <option value="applied">Applied</option>
+          <option value="viewed">Viewed</option>
+          <option value="shortlisted">Shortlisted</option>
+          <option value="interview">Interview</option>
+          <option value="offered">Offered</option>
+          <option value="rejected">Rejected</option>
+        </select>
+      </div>
+    </div>
+    <div class="form-group" style="margin-top:16px">
+      <label class="form-label">Notes</label>
+      <textarea class="form-textarea" id="app-notes" placeholder="Any notes about this application..."></textarea>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-ghost" style="flex:1;justify-content:center" onclick="closeModal('appModal')">Cancel</button>
+      <button class="btn btn-primary" id="btn-add-app" style="flex:2;justify-content:center" onclick="submitApplication()">Save Application</button>
+    </div>
+  </div>
+</div>
+
+<!-- ════════════════════════════ ADD ALERT MODAL ════════════════════════════ -->
+<div class="modal-overlay" id="alertModal" style="display:none">
+  <div class="modal">
+    <h2>Create Job Alert 🔔</h2>
+    <p class="modal-sub">Get notified when new matching jobs are posted.</p>
+    <div class="form-group">
+      <label class="form-label">Alert Name</label>
+      <input class="form-input" id="al-name" placeholder="e.g. Oracle SOA Jobs">
+    </div>
+    <div class="form-group">
+      <label class="form-label">Keywords (press Enter to add)</label>
+      <input class="form-input" id="al-kw-input" placeholder="e.g. Oracle SOA" onkeydown="addAlertKeyword(event)">
+      <div class="form-tags" id="al-keywords-tags"></div>
+    </div>
+    <div class="form-row">
+      <div class="form-group" style="margin-bottom:0">
+        <label class="form-label">Location</label>
+        <input class="form-input" id="al-location" placeholder="e.g. Noida, India">
+      </div>
+      <div class="form-group" style="margin-bottom:0">
+        <label class="form-label">Min Salary (LPA)</label>
+        <input class="form-input" id="al-salary" type="number" placeholder="20">
+      </div>
+    </div>
+    <div class="form-group" style="margin-top:16px;display:flex;align-items:center;gap:10px">
+      <input type="checkbox" id="al-notify-email" checked style="width:16px;height:16px;accent-color:var(--accent)">
+      <label for="al-notify-email" style="font-size:13.5px">Email notifications</label>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-ghost" style="flex:1;justify-content:center" onclick="closeModal('alertModal')">Cancel</button>
+      <button class="btn btn-primary" id="btn-create-alert" style="flex:2;justify-content:center" onclick="submitAlert()">Create Alert</button>
+    </div>
+  </div>
+</div>
+
+<!-- ════════════════════════════ APP SHELL ════════════════════════════ -->
+<div class="app" id="appShell" style="display:none">
+
+  <!-- SIDEBAR -->
+  <nav class="sidebar" id="sidebar">
+    <div class="logo">CareerPulse<span>Career Intelligence</span></div>
+
+    <div class="nav-label">Overview</div>
+    <div class="nav-item active" onclick="showPage('dashboard',this)" id="nav-dashboard"><span class="icon">📊</span>Dashboard</div>
+    <div class="nav-item" onclick="showPage('profile',this)" id="nav-profile"><span class="icon">🧠</span>Profile AI</div>
+
+    <div class="nav-label">Jobs</div>
+    <div class="nav-item" onclick="showPage('jobs',this)" id="nav-jobs"><span class="icon">🔍</span>Browse Jobs<span class="nav-badge" id="nb-jobs" style="display:none">0</span></div>
+    <div class="nav-item" onclick="showPage('saved',this)" id="nav-saved"><span class="icon">🔖</span>Saved Jobs</div>
+    <div class="nav-item" onclick="showPage('alerts',this)" id="nav-alerts"><span class="icon">🔔</span>Alerts<span class="nav-badge" id="nb-notifs" style="display:none">0</span></div>
+
+    <div class="nav-label">Career</div>
+    <div class="nav-item" onclick="showPage('analytics',this)" id="nav-analytics"><span class="icon">📈</span>Analytics</div>
+    <div class="nav-item" onclick="showPage('network',this)" id="nav-network"><span class="icon">🤝</span>Network Tips</div>
+    <div class="nav-item" onclick="showPage('tracker',this)" id="nav-tracker"><span class="icon">📋</span>App Tracker</div>
+
+    <div class="nav-label">Settings</div>
+    <div class="nav-item" onclick="showPage('portals',this)" id="nav-portals"><span class="icon">🔌</span>Portals</div>
+    <div class="nav-item" onclick="showPage('settings',this)" id="nav-settings"><span class="icon">⚙️</span>Settings</div>
+
+    <div class="sidebar-footer">
+      <div class="user-chip" onclick="showPage('settings',document.getElementById('nav-settings'))">
+        <div class="avatar" id="sb-avatar">?</div>
+        <div class="user-info">
+          <p id="sb-name">Loading...</p>
+          <small id="sb-role">—</small>
+        </div>
+      </div>
+    </div>
+  </nav>
+
+  <!-- MAIN CONTENT -->
+  <main class="main">
+    <button class="burger" onclick="toggleSidebar()">☰</button>
+
+    <!-- ─────────────────── DASHBOARD ─────────────────── -->
+    <div class="page active" id="page-dashboard">
+      <div class="topbar">
+        <div>
+          <div class="page-title">Good day, <span id="dash-name">there</span> 👋</div>
+          <div class="page-sub" id="dash-sub">Here's your career pulse for today</div>
+        </div>
+        <div class="topbar-right">
+          <button class="btn btn-ghost btn-sm" onclick="doSyncJobs()" id="btn-sync">🔄 Sync Jobs</button>
+          <button class="btn btn-primary btn-sm" onclick="showPage('jobs',document.getElementById('nav-jobs'))">Find Jobs</button>
+        </div>
+      </div>
+
+      <div class="grid-4" style="margin-bottom:20px" id="dash-stats">
+        <div class="stat-card"><div class="stat-label">Profile Score</div><div class="stat-value" id="ds-score" style="color:var(--accent2)">—</div><div class="stat-delta" id="ds-score-sub" style="color:var(--muted)">Analyze to get score</div></div>
+        <div class="stat-card"><div class="stat-label">New Jobs Today</div><div class="stat-value" id="ds-new" style="color:var(--teal)">—</div><div class="stat-delta delta-up" id="ds-new-sub">across all portals</div></div>
+        <div class="stat-card"><div class="stat-label">Applications</div><div class="stat-value" id="ds-applied">—</div><div class="stat-delta" style="color:var(--muted)">tracked this month</div></div>
+        <div class="stat-card"><div class="stat-label">Total Matches</div><div class="stat-value" id="ds-total" style="color:var(--amber)">—</div><div class="stat-delta" style="color:var(--muted)">jobs in your feed</div></div>
+      </div>
+
+      <div class="grid-2" style="margin-bottom:20px">
+        <div class="card">
+          <div class="section-head">
+            <div class="section-title">Profile Health</div>
+            <button class="btn btn-ghost btn-sm" onclick="showPage('profile',document.getElementById('nav-profile'))">Full Analysis →</button>
+          </div>
+          <div style="display:flex;align-items:center;gap:22px" id="dash-profile-content">
+            <div class="score-ring-wrap">
+              <svg width="110" height="110" viewBox="0 0 110 110">
+                <circle cx="55" cy="55" r="46" fill="none" stroke="rgba(255,255,255,0.06)" stroke-width="9"/>
+                <circle id="dash-score-ring" cx="55" cy="55" r="46" fill="none" stroke="url(#rg1)" stroke-width="9" stroke-linecap="round" stroke-dasharray="289" stroke-dashoffset="289"/>
+                <defs><linearGradient id="rg1" x1="0" y1="0" x2="1" y2="1"><stop offset="0%" stop-color="#6c63ff"/><stop offset="100%" stop-color="#2dd4bf"/></linearGradient></defs>
+              </svg>
+              <div class="score-center"><div class="num" id="dash-score-num" style="color:var(--accent2)">—</div><div class="lbl">/100</div></div>
+            </div>
+            <div style="flex:1" id="dash-score-bars">
+              <p style="font-size:13px;color:var(--muted)">Run a profile analysis to see your score and recommendations.</p>
+              <button class="btn btn-primary btn-sm" style="margin-top:12px" onclick="runProfileAnalysis()" id="btn-dash-analyze">Analyze Now ✨</button>
+            </div>
+          </div>
+        </div>
+
+        <div class="card">
+          <div class="section-head">
+            <div class="section-title">Top Matches</div>
+            <button class="btn btn-ghost btn-sm" onclick="showPage('jobs',document.getElementById('nav-jobs'))">See all →</button>
+          </div>
+          <div id="dash-top-jobs"><div class="empty-state" style="padding:20px 0"><div class="ei">🔍</div><p>Syncing jobs...</p></div></div>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="section-head"><div class="section-title">Recent Notifications</div><div class="nav-badge" id="dash-notif-count" style="display:none;animation:none"></div></div>
+        <div id="dash-notifications"><div class="empty-state" style="padding:20px 0"><div class="ei">🔔</div><p>No notifications yet</p></div></div>
+      </div>
+    </div>
+
+    <!-- ─────────────────── PROFILE AI ─────────────────── -->
+    <div class="page" id="page-profile">
+      <div class="topbar">
+        <div><div class="page-title">Profile AI Analysis 🧠</div><div class="page-sub">AI-powered suggestions to maximize LinkedIn visibility</div></div>
+        <div class="topbar-right">
+          <button class="btn btn-ghost btn-sm" onclick="showPage('settings',document.getElementById('nav-settings'))">Edit Profile</button>
+          <button class="btn btn-primary btn-sm" onclick="runProfileAnalysis()" id="btn-analyze">Analyze Profile ✨</button>
+        </div>
+      </div>
+
+      <div class="grid-2" style="margin-bottom:20px">
+        <div class="card" style="overflow:hidden">
+          <div class="lp-banner"></div>
+          <div class="lp-avatar-wrap">
+            <div class="lp-avatar" id="lp-avatar">?</div>
+          </div>
+          <div style="padding:0 4px">
+            <div style="font-family:'Syne',sans-serif;font-weight:700;font-size:19px;margin-bottom:2px" id="lp-name">—</div>
+            <div style="font-size:13px;color:var(--muted);margin-bottom:4px" id="lp-headline">—</div>
+            <div style="font-size:12px;color:var(--muted2)" id="lp-location">India</div>
+            <div style="display:flex;gap:24px;margin-top:16px;padding-top:16px;border-top:1px solid var(--border)">
+              <div><div style="font-family:'Syne',sans-serif;font-weight:700;font-size:20px;color:var(--teal)" id="lp-stat1">—</div><div style="font-size:11px;color:var(--muted)">Profile views</div></div>
+              <div><div style="font-family:'Syne',sans-serif;font-weight:700;font-size:20px;color:var(--accent2)" id="lp-stat2">—</div><div style="font-size:11px;color:var(--muted)">Search appears</div></div>
+              <div><div style="font-family:'Syne',sans-serif;font-weight:700;font-size:20px;color:var(--amber)" id="lp-stat3">—</div><div style="font-size:11px;color:var(--muted)">Posts impressions</div></div>
+            </div>
+          </div>
+        </div>
+
+        <div class="card">
+          <div class="section-head"><div class="section-title">Profile Score</div></div>
+          <div style="display:flex;align-items:center;gap:20px;margin-bottom:20px">
+            <div class="score-ring-wrap">
+              <svg width="110" height="110" viewBox="0 0 110 110">
+                <circle cx="55" cy="55" r="46" fill="none" stroke="rgba(255,255,255,0.06)" stroke-width="9"/>
+                <circle id="profile-score-ring" cx="55" cy="55" r="46" fill="none" stroke="url(#rg2)" stroke-width="9" stroke-linecap="round" stroke-dasharray="289" stroke-dashoffset="289"/>
+                <defs><linearGradient id="rg2" x1="0" y1="0" x2="1" y2="1"><stop offset="0%" stop-color="#6c63ff"/><stop offset="100%" stop-color="#2dd4bf"/></linearGradient></defs>
+              </svg>
+              <div class="score-center"><div class="num" id="profile-score-num" style="color:var(--accent2)">—</div><div class="lbl" id="profile-score-label">Run analysis</div></div>
+            </div>
+            <div style="flex:1">
+              <p style="font-size:13px;color:var(--muted);line-height:1.7" id="profile-ai-summary">Click "Analyze Profile" to get your AI-powered score and personalized suggestions.</p>
+              <div style="display:flex;flex-wrap:wrap;gap:6px;margin-top:12px" id="profile-insight-chips"></div>
+            </div>
+          </div>
+          <div id="profile-section-bars"></div>
+        </div>
+      </div>
+
+      <div class="section-head"><div class="section-title">Improvement Suggestions</div><div id="profile-sug-count" class="badge badge-rose" style="display:none"></div></div>
+      <div id="profile-suggestions">
+        <div class="empty-state"><div class="ei">✨</div><h3>No analysis yet</h3><p>Click "Analyze Profile" to get personalized AI suggestions</p><button class="btn btn-primary" style="margin-top:16px" onclick="runProfileAnalysis()" id="btn-analyze2">Analyze Now</button></div>
+      </div>
+    </div>
+
+    <!-- ─────────────────── BROWSE JOBS ─────────────────── -->
+    <div class="page" id="page-jobs">
+      <div class="topbar">
+        <div><div class="page-title">Browse Jobs 🔍</div><div class="page-sub" id="jobs-sub">Aggregated from all connected portals</div></div>
+        <div class="topbar-right">
+          <div class="toggle-group">
+            <button class="toggle-opt active" onclick="setJobView('all',this)">All</button>
+            <button class="toggle-opt" onclick="setJobView('best',this)">Best Match</button>
+            <button class="toggle-opt" onclick="setJobView('remote',this)">Remote</button>
+            <button class="toggle-opt" onclick="setJobView('new',this)">New Today</button>
+          </div>
+        </div>
+      </div>
+      <div class="search-box">
+        <span style="font-size:17px;color:var(--muted)">🔍</span>
+        <input placeholder="Search by title, company, skill..." id="job-search" oninput="onJobSearch(this.value)">
+        <button class="btn btn-ghost btn-sm" onclick="doSyncJobs()">🔄 Refresh</button>
+      </div>
+      <div class="filter-bar" id="job-filter-bar">
+        <button class="filter-pill active" onclick="setJobTag('all',this)">All</button>
+        <button class="filter-pill" onclick="setJobTag('remote',this)">Remote</button>
+        <button class="filter-pill" onclick="setJobTag('hybrid',this)">Hybrid</button>
+        <button class="filter-pill" onclick="setJobTag('linkedin',this)">LinkedIn</button>
+        <button class="filter-pill" onclick="setJobTag('naukri',this)">Naukri</button>
+        <button class="filter-pill" onclick="setJobTag('indeed',this)">Indeed</button>
+      </div>
+      <div id="jobs-grid" class="grid-auto"></div>
+      <div style="text-align:center;margin-top:20px" id="jobs-load-more" style="display:none">
+        <button class="btn btn-ghost" onclick="loadMoreJobs()">Load More Jobs</button>
+      </div>
+    </div>
+
+    <!-- ─────────────────── SAVED JOBS ─────────────────── -->
+    <div class="page" id="page-saved">
+      <div class="topbar">
+        <div><div class="page-title">Saved Jobs 🔖</div><div class="page-sub">Jobs you've bookmarked for later</div></div>
+      </div>
+      <div id="saved-grid" class="grid-auto"></div>
+    </div>
+
+    <!-- ─────────────────── ALERTS ─────────────────── -->
+    <div class="page" id="page-alerts">
+      <div class="topbar">
+        <div><div class="page-title">Job Alerts 🔔</div><div class="page-sub">Automated job matching alerts from all portals</div></div>
+        <div class="topbar-right">
+          <button class="btn btn-ghost btn-sm" onclick="api.markAllRead().then(loadNotifications)">Mark all read</button>
+          <button class="btn btn-primary btn-sm" onclick="openModal('alertModal')">+ New Alert</button>
+        </div>
+      </div>
+
+      <div class="section-head" style="margin-bottom:14px"><div class="section-title">Active Alerts</div></div>
+      <div class="card" style="margin-bottom:24px" id="alerts-list"></div>
+
+      <div class="section-head" style="margin-bottom:14px">
+        <div class="section-title">Notifications</div>
+        <span class="badge badge-rose" id="notif-unread-badge" style="display:none"></span>
+      </div>
+      <div id="notifications-list"></div>
+    </div>
+
+    <!-- ─────────────────── ANALYTICS ─────────────────── -->
+    <div class="page" id="page-analytics">
+      <div class="topbar">
+        <div><div class="page-title">Analytics 📈</div><div class="page-sub">Your career metrics at a glance</div></div>
+      </div>
+      <div class="grid-4" style="margin-bottom:20px" id="analytics-stats"></div>
+      <div class="grid-2" style="margin-bottom:20px">
+        <div class="card">
+          <div class="section-head"><div class="section-title">Jobs by Portal</div></div>
+          <div id="analytics-by-portal"></div>
+        </div>
+        <div class="card">
+          <div class="section-head"><div class="section-title">Salary Benchmark</div></div>
+          <div id="analytics-salary"></div>
+        </div>
+      </div>
+      <div class="card">
+        <div class="section-head"><div class="section-title">Application Status Overview</div></div>
+        <div id="analytics-app-status" style="display:flex;gap:12px;flex-wrap:wrap"></div>
+      </div>
+    </div>
+
+    <!-- ─────────────────── NETWORK TIPS ─────────────────── -->
+    <div class="page" id="page-network">
+      <div class="topbar">
+        <div><div class="page-title">Network Growth Tips 🤝</div><div class="page-sub">Proven strategies to 10x your professional network</div></div>
+      </div>
+      <div id="network-tips-content"></div>
+    </div>
+
+    <!-- ─────────────────── APP TRACKER ─────────────────── -->
+    <div class="page" id="page-tracker">
+      <div class="topbar">
+        <div><div class="page-title">Application Tracker 📋</div><div class="page-sub">Track every job application in one place</div></div>
+        <button class="btn btn-primary btn-sm" onclick="openModal('appModal')">+ Add Application</button>
+      </div>
+      <div class="grid-4" style="margin-bottom:20px" id="tracker-stats"></div>
+      <div class="card">
+        <div style="overflow-x:auto"><table class="data-table" id="tracker-table"><thead><tr><th>Role</th><th>Company</th><th>Portal</th><th>Date</th><th>Status</th><th>Actions</th></tr></thead><tbody id="tracker-tbody"></tbody></table></div>
+      </div>
+    </div>
+
+    <!-- ─────────────────── PORTALS ─────────────────── -->
+    <div class="page" id="page-portals">
+      <div class="topbar">
+        <div><div class="page-title">Job Portals 🔌</div><div class="page-sub">Manage your connected portals</div></div>
+      </div>
+      <div class="info-banner">
+        <span style="font-size:20px">🔑</span>
+        <div>Your <strong id="portal-email-key">email</strong> & <strong id="portal-phone-key">mobile</strong> are your universal identity key — jobs from all portals aggregate into your single CareerPulse feed automatically.</div>
+      </div>
+      <div class="grid-3" id="portals-grid"></div>
+    </div>
+
+    <!-- ─────────────────── SETTINGS ─────────────────── -->
+    <div class="page" id="page-settings">
+      <div class="topbar">
+        <div><div class="page-title">Settings ⚙️</div><div class="page-sub">Manage your profile and preferences</div></div>
+        <button class="btn btn-primary btn-sm" onclick="saveSettings()" id="btn-save-settings">Save Changes</button>
+      </div>
+      <div class="grid-2">
+        <div class="card">
+          <div class="section-head"><div class="section-title">Personal Info</div></div>
+          <div class="form-group"><label class="form-label">Full Name</label><input class="form-input" id="st-name" placeholder="Your name"></div>
+          <div class="form-group"><label class="form-label">Email</label><input class="form-input" id="st-email" type="email" readonly style="opacity:.6;cursor:not-allowed"></div>
+          <div class="form-group"><label class="form-label">Mobile</label><input class="form-input" id="st-mobile" placeholder="+91 9999999999"></div>
+          <div class="form-group"><label class="form-label">Location</label><input class="form-input" id="st-location" placeholder="City, State"></div>
+        </div>
+        <div class="card">
+          <div class="section-head"><div class="section-title">Career Profile</div></div>
+          <div class="form-group"><label class="form-label">LinkedIn URL</label><input class="form-input" id="st-linkedin" placeholder="https://linkedin.com/in/..."></div>
+          <div class="form-group"><label class="form-label">Current Role</label><input class="form-input" id="st-role" placeholder="Sr. Integration Engineer"></div>
+          <div class="form-group"><label class="form-label">Years of Experience</label><input class="form-input" id="st-exp" type="number" placeholder="8" min="0"></div>
+          <div class="form-group">
+            <label class="form-label">Skills (press Enter to add)</label>
+            <input class="form-input" id="st-skill-input" placeholder="e.g. Apache Kafka" onkeydown="addSettingSkill(event)">
+            <div class="form-tags" id="st-skills-tags"></div>
+          </div>
+        </div>
+      </div>
+      <div class="card" style="margin-top:20px">
+        <div class="section-head"><div class="section-title">Account</div></div>
+        <div style="display:flex;align-items:center;justify-content:space-between">
+          <div><p style="font-size:14px;font-weight:500">Sign Out</p><p style="font-size:13px;color:var(--muted)">Sign out of your CareerPulse account</p></div>
+          <button class="btn btn-danger btn-sm" onclick="doLogout()">Sign Out</button>
+        </div>
+      </div>
+    </div>
+
+  </main>
+</div>
+
+<script src="src/api.js"></script>
+<script src="src/state.js"></script>
+<script src="src/app.js"></script>
+</body>
+</html>
