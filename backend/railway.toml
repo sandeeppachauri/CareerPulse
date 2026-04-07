@@ -1,5 +1,11 @@
 [build]
-builder = "NIXPACKS"
+builder = "RAILPACK"
+
+[build.environment]
+RAILPACK_NODE_VERSION = "22"
+
+[build.packages]
+python3 = "*"
 
 [deploy]
 startCommand = "node server.js"
